@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="ursoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f2fe" />
+      <stop offset="50%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#7928ca" />
+    </linearGradient>
+    <linearGradient id="neonCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f2fe" />
+      <stop offset="100%" stop-color="#10b981" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="10" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Background Shield -->
+  <rect width="512" height="512" rx="128" fill="#080c16" />
+  <rect x="16" y="16" width="480" height="480" rx="112" stroke="url(#ursoGrad)" stroke-width="4" stroke-opacity="0.3" />
+
+  <!-- Bear Ears -->
+  <circle cx="140" cy="150" r="56" fill="#141d30" stroke="url(#ursoGrad)" stroke-width="12" />
+  <circle cx="140" cy="150" r="28" fill="#00f2fe" fill-opacity="0.4" />
+
+  <circle cx="372" cy="150" r="56" fill="#141d30" stroke="url(#ursoGrad)" stroke-width="12" />
+  <circle cx="372" cy="150" r="28" fill="#7928ca" fill-opacity="0.4" />
+
+  <!-- Bear Head Contour (Geometric Polygon) -->
+  <path d="M150 180 L362 180 L410 280 L350 410 L256 450 L162 410 L102 280 Z" fill="#0d1424" stroke="url(#ursoGrad)" stroke-width="14" stroke-linejoin="round" />
+
+  <!-- Neon Cheeks & Jaw Highlights -->
+  <path d="M120 285 L180 390 L256 425 L332 390 L392 285" stroke="url(#neonCyan)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- Glowing Eyes (Cyber Visor / Capture Lenses) -->
+  <polygon points="175,260 225,260 215,280 185,280" fill="#00f2fe" filter="url(#glow)" />
+  <polygon points="287,260 337,260 327,280 297,280" fill="#00f2fe" filter="url(#glow)" />
+
+  <!-- Center Snout / Aperture Camera Lens (The "Capture" Core) -->
+  <circle cx="256" cy="330" r="44" fill="#090d18" stroke="url(#ursoGrad)" stroke-width="8" />
+  <circle cx="256" cy="330" r="28" stroke="#00f2fe" stroke-width="4" stroke-dasharray="8 4" />
+  <!-- Live REC Dot -->
+  <circle cx="256" cy="330" r="14" fill="#ff0055" filter="url(#glow)" />
+
+  <!-- Bear Nose / Muzzle Shape -->
+  <path d="M242 300 L270 300 L256 314 Z" fill="#ffffff" />
+</svg>
