@@ -7,8 +7,8 @@ Aplicação desktop de alta performance construída com Tauri 2, Vue 3 e Rust.
 O projeto está configurado com um fluxo automatizado em [`.github/workflows/build-and-release.yml`](.github/workflows/build-and-release.yml):
 
 ### 1. Geração de Artefatos em Modificações (Push / Pull Request)
-- A cada `push` nas branches `main` ou `master` (ou `pull_request`), o workflow executa a compilação cruzada para **Windows**, **Linux** e **macOS**.
-- Os instaladores gerados ficam disponíveis para download diretamente na aba **Actions** do GitHub, na seção **Artifacts** de cada execução (`UrsoCapture-windows-installer`, etc.).
+- A cada `push` nas branches `main` ou `master` (ou `pull_request`), o workflow executa a compilação para **Windows** e **Linux**.
+- Os instaladores gerados ficam disponíveis para download diretamente na aba **Actions** do GitHub, na seção **Artifacts** de cada execução (`UrsoCapture-windows-installer`, `UrsoCapture-linux-installer`).
 
 ### 2. Publicação Automática de Releases (Tags de Versão)
 - Quando uma tag com prefixo `v` for criada e enviada (ex: `v0.1.0`), o GitHub Actions criará automaticamente uma **GitHub Release** oficial com todos os executáveis e instaladores anexados.
