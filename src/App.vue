@@ -26,10 +26,14 @@ const audioVisualizerCanvasRef = ref<HTMLCanvasElement | null>(null);
 // Device Lists
 const videoDevices = ref<MediaDeviceInfoItem[]>([]);
 const audioDevices = ref<MediaDeviceInfoItem[]>([]);
+const audioOutputDevices = ref<MediaDeviceInfoItem[]>([]);
 
 // Selected Device IDs
 const selectedVideoId = ref<string>("");
 const selectedAudioId = ref<string>("");
+const selectedAudioOutputId = ref<string>(
+  localStorage.getItem("ursocapture_audio_output_id") || ""
+);
 
 // Video Display & Anti-Border Calibration
 type FitMode = "cover" | "contain" | "fill";
@@ -124,11 +128,28 @@ async function refreshDevices() {
         groupId: d.groupId,
       }));
 
+    audioOutputDevices.value = devices
+      .filter((d) => d.kind === "audiooutput")
+      .map((d, idx) => ({
+        deviceId: d.deviceId,
+        label: d.label || `Dispositivo de Saída ${idx + 1}`,
+        kind: d.kind,
+        groupId: d.groupId,
+      }));
+
     if (!selectedVideoId.value && videoDevices.value.length > 0) {
       selectedVideoId.value = videoDevices.value[0].deviceId;
     }
     if (!selectedAudioId.value && audioDevices.value.length > 0) {
       selectedAudioId.value = audioDevices.value[0].deviceId;
+    }
+
+    // Verify if previous saved output device still exists
+    if (selectedAudioOutputId.value) {
+      const exists = audioOutputDevices.value.some((d) => d.deviceId === selectedAudioOutputId.value);
+      if (!exists && audioOutputDevices.value.length > 0) {
+        selectedAudioOutputId.value = "";
+      }
     }
   } catch (err: any) {
     console.error("Erro ao enumerar dispositivos:", err);
@@ -255,9 +276,35 @@ function setupAudioAnalysis(stream: MediaStream) {
     audioSourceNode.connect(monitorGainNode);
     monitorGainNode.connect(audioContext.destination);
 
+    // Apply custom audio output sink if set
+    if (selectedAudioOutputId.value && typeof (audioContext as any).setSinkId === "function") {
+      (audioContext as any).setSinkId(selectedAudioOutputId.value).catch((err: any) => {
+        console.warn("Não foi possível aplicar dispositivo de saída ao iniciar:", err);
+      });
+    }
+
     drawAudioVisualizer();
   } catch (err) {
     console.error("Erro configurando Web Audio:", err);
+  }
+}
+
+async function applyAudioOutputDevice(deviceId: string) {
+  selectedAudioOutputId.value = deviceId;
+  localStorage.setItem("ursocapture_audio_output_id", deviceId);
+
+  if (audioContext && typeof (audioContext as any).setSinkId === "function") {
+    try {
+      await (audioContext as any).setSinkId(deviceId);
+      const targetDevice = audioOutputDevices.value.find((d) => d.deviceId === deviceId);
+      showToast(`Saída de áudio: ${targetDevice ? targetDevice.label : "Padrão do Sistema"}`);
+    } catch (err: any) {
+      console.error("Erro ao alterar saída de áudio:", err);
+      showToast("Não foi possível alternar a saída de áudio.");
+    }
+  } else {
+    const targetDevice = audioOutputDevices.value.find((d) => d.deviceId === deviceId);
+    showToast(`Saída selecionada: ${targetDevice ? targetDevice.label : "Padrão do Sistema"}`);
   }
 }
 
@@ -466,6 +513,10 @@ onMounted(async () => {
     }
   });
 
+  if (navigator.mediaDevices && typeof navigator.mediaDevices.addEventListener === "function") {
+    navigator.mediaDevices.addEventListener("devicechange", refreshDevices);
+  }
+
   window.addEventListener("mousemove", resetHideTimer);
   window.addEventListener("pointermove", resetHideTimer);
   window.addEventListener("mousedown", resetHideTimer);
@@ -490,6 +541,9 @@ onUnmounted(() => {
   stopLivePreview();
   if (statsTimer) clearInterval(statsTimer);
   if (hideControlsTimer) clearTimeout(hideControlsTimer);
+  if (navigator.mediaDevices && typeof navigator.mediaDevices.removeEventListener === "function") {
+    navigator.mediaDevices.removeEventListener("devicechange", refreshDevices);
+  }
   window.removeEventListener("mousemove", resetHideTimer);
   window.removeEventListener("pointermove", resetHideTimer);
   window.removeEventListener("mousedown", resetHideTimer);
@@ -748,6 +802,22 @@ onUnmounted(() => {
             <option v-if="audioDevices.length === 0" value="">Nenhum microfone detectado</option>
           </select>
           <span class="block-hint">Áudio da placa de captura, microfones e interfaces USB.</span>
+        </div>
+
+        <!-- Audio Output Device -->
+        <div class="setting-block">
+          <label class="block-label">🔊 Dispositivo de Saída de Áudio (Retorno)</label>
+          <select
+            :value="selectedAudioOutputId"
+            class="drawer-select"
+            @change="applyAudioOutputDevice(($event.target as HTMLSelectElement).value)"
+          >
+            <option value="">Padrão do Sistema Operacional</option>
+            <option v-for="dev in audioOutputDevices" :key="dev.deviceId" :value="dev.deviceId">
+              {{ dev.label }}
+            </option>
+          </select>
+          <span class="block-hint">Escolha onde ouvir o áudio do jogo (fones de ouvido, alto-falantes ou monitores).</span>
         </div>
 
         <!-- Target Resolution -->
